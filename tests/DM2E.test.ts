@@ -112,16 +112,16 @@ describe("testing for DM2E", async () => {
       await contract.connect(owner).pause();
       expect(await contract.paused()).to.equal(true);
 
-      // transfer while paused
+      // Transfer while paused
       expect(
         contract.transfer(addr1.address, 100)
       ).to.be.revertedWith('ERC20Pausable: token transfer while paused');
 
-      // unpause
+      // Unpause
       await contract.connect(owner).unpause();
       expect(await contract.paused()).to.equal(false);
 
-      // trasfer after unpause
+      // Trasfer after unpause
       await contract.transfer(addr1.address, 50);
       const addr1Balance = await contract.balanceOf(addr1.address);
       expect(addr1Balance).to.equal(50);
@@ -186,52 +186,59 @@ describe("testing for DM2E", async () => {
   });
 
   describe("AccessControl", async function () {
-
+    // Check initial roles
     it("Should grant initial DEFAULT_ADMIN_ROLE correctly", async function () {
       expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.equal(true);
       expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)).to.equal(false);
     });
 
+    // Grant role
     it("Should allow admin to grant role", async function () {
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(false);
 
       await contract.connect(owner).grantRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(true);
 
-      // mint
+      // Mint
       await contract.connect(addr1).mint(addr2.address, 50);
       expect(
         await contract.balanceOf(addr2.address)
       ).to.equal(50);
     });
 
+    // Non-admin grant role
     it("Should fail when grant role by non-admin", async function () {
       expect(
         contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address)
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`);
     });
 
+    // Revoke role
     it("Should allow admin to revoke role", async function () {
+      // Grant MINER_ROLE
       await contract.connect(owner).grantRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(true);
 
-      // Revoke
+      // Revoke MINER_ROLE
       await contract.connect(owner).revokeRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(false);
 
-      // Mint
+      // Mint without MINER_ROLE
       expect(
         contract.connect(addr1).mint(owner.address, 50)
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`);
     });
 
+    // Grant ADMIN_ROLE
     it("Should allow admin to revoke role", async function () {
       await contract.connect(owner).grantRole(DEFAULT_ADMIN_ROLE, addr1.address);
       expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)).to.equal(true);
 
+      // Grant MINER_ROLE with new ADMIN_ROLE
       await contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address)
       expect(await contract.hasRole(MINTER_ROLE, addr2.address)).to.equal(true);
 
+      // Grant MINER_ROLE without ADMIN_ROLE
       await contract.connect(owner).revokeRole(DEFAULT_ADMIN_ROLE, addr1.address);
       expect(
         contract.connect(addr1).grantRole(MINTER_ROLE, addr1.address)

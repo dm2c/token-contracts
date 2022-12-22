@@ -84,17 +84,17 @@ describe("testing for DM2P", async () => {
 
 
   describe("Mint", async function () {
-    // 最初のサプライ
+    // First supply
     it("Should mint initial supplies correctly", async function () {
       expect(initialOwnerBalance).to.equal(initialSupply);
     });
 
-    // capの量
+    // Cap amount
     it("Shoud set cap correctly", async function () {
       expect(await contract.cap()).to.equal(capAmount);
     });
 
-    // // 管理者によるミント
+    // Admin mint
     it("Should allow admin to mint", async function () {
       await contract.connect(owner).mint(owner.address, 50);
       expect(
@@ -102,14 +102,14 @@ describe("testing for DM2P", async () => {
       ).to.equal(initialOwnerBalance.add(50));
     });
 
-    // // 管理者以外によるミント
+    // Non-admin mint
     it("Should fail to mint when users other than admin signs", async function () {
       expect(
         contract.connect(addr1).mint(owner.address, 50)
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`);
     });
 
-    // キャップを超えたミント
+    // Mint exceeds the cap
     it("Should fail when exceeds the cap", async function () {
       expect(
         contract.connect(owner).mint(owner.address, capAmount.add(50))
@@ -119,28 +119,28 @@ describe("testing for DM2P", async () => {
 
 
   describe("pause", async function () {
-    // 管理者によるpause, unpause
+    // Admin pause, unpause
     it("Should allow admin to paused and unpaused", async function () {
       //pause
       await contract.connect(owner).pause();
       expect(await contract.paused()).to.equal(true);
 
-      // pause中のtransfer
+      // Transfer while paused
       expect(
         contract.transfer(addr1.address, 100)
       ).to.be.revertedWith('ERC20Pausable: token transfer while paused');
 
-      //unpause
+      // Unpause
       await contract.connect(owner).unpause();
       expect(await contract.paused()).to.equal(false);
 
-      // unpause後のtransfer
+      // Trasfer after unpause
       await contract.transfer(addr1.address, 50);
       const addr1Balance = await contract.balanceOf(addr1.address);
       expect(addr1Balance).to.equal(50);
     });
 
-    // 管理者以外のpause
+    // Non-admin pause
     it("Should fail when pause by non-admin", async function () {
       expect(
         contract.connect(addr1).pause()
@@ -149,7 +149,7 @@ describe("testing for DM2P", async () => {
   });
 
   describe("burn", async function () {
-    // 管理者によるburn
+    // Admin burn
     it("Should allow burn by admin", async function () {
       await contract.connect(owner).burn(50);
       expect(
@@ -158,14 +158,14 @@ describe("testing for DM2P", async () => {
       expect(await contract.totalSupply()).to.equal(initialSupply.sub(50));
     });
 
-    // 管理者以外によるburn
+    // Non-admin burn
     it("Should fail when burn by non-admin", async function () {
       expect(
         contract.connect(addr1).burn(50)
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${BURNER_ROLE}`);
     });
 
-    // 管理者によるburnFrom
+    // Admin burnFrom
     it("Should allow burnFrom by admin", async function () {
       await contract.connect(owner).mint(addr1.address, 100);
       await contract.connect(addr1).approve(owner.address, 50);
@@ -177,7 +177,7 @@ describe("testing for DM2P", async () => {
       expect(await contract.totalSupply()).to.equal(initialSupply.add(50));
     });
 
-    // 管理者以外によるburnFrom
+    // Non-admin burnFrom
     it("Should fail when burnFrom by non-admin", async function () {
       await contract.connect(owner).mint(addr1.address, 100);
       await contract.connect(addr1).approve(addr2.address, 50);
@@ -187,7 +187,7 @@ describe("testing for DM2P", async () => {
       ).to.be.revertedWith(`AccessControl: account ${addr2.address.toLowerCase()} is missing role ${BURNER_ROLE}`);
     });
 
-    // approveを超えるburnFrom
+    // burnFrom exceeds the approve
     it("Should fail when exceeds the approve", async function () {
       await contract.connect(owner).mint(addr1.address, 100);
       await contract.connect(addr1).approve(owner.address, 50);
@@ -199,59 +199,59 @@ describe("testing for DM2P", async () => {
   });
 
   describe("AccessControl", async function () {
-    // 初期の DEFAULT_ADMIN_ROLE の確認
+    // Check initial roles
     it("Should grant initial DEFAULT_ADMIN_ROLE correctly", async function () {
       expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.equal(true);
       expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)).to.equal(false);
     });
 
-    // 権限の付与
+    // Grant role
     it("Should allow admin to grant role", async function () {
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(false);
 
-      //権限付与
       await contract.connect(owner).grantRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(true);
 
-      //mint
+      // Mint
       await contract.connect(addr1).mint(addr2.address, 50);
       expect(
         await contract.balanceOf(addr2.address)
       ).to.equal(50);
     });
 
-    // 管理者以外の権限付与
+    // Non-admin grant role
     it("Should fail when grant role by non-admin", async function () {
       expect(
         contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address)
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`);
     });
 
-    // 権限の解除
+    // Revoke role
     it("Should allow admin to revoke role", async function () {
+      // Grant MINER_ROLE
       await contract.connect(owner).grantRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(true);
 
-      //権限解除
+      // Revoke MINER_ROLE
       await contract.connect(owner).revokeRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(false);
 
-      //mint
+      // Mint without MINER_ROLE
       expect(
         contract.connect(addr1).mint(owner.address, 50)
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`);
     });
 
-    // 管理者の付与
+    // Grant ADMIN_ROLE
     it("Should allow admin to revoke role", async function () {
       await contract.connect(owner).grantRole(DEFAULT_ADMIN_ROLE, addr1.address);
       expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)).to.equal(true);
 
-      //初期管理者以外による権限付与
+      // Grant MINER_ROLE with new ADMIN_ROLE
       await contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address)
       expect(await contract.hasRole(MINTER_ROLE, addr2.address)).to.equal(true);
 
-      //管理権限剥奪後の権限付与
+      // Grant MINER_ROLE without ADMIN_ROLE
       await contract.connect(owner).revokeRole(DEFAULT_ADMIN_ROLE, addr1.address);
       expect(
         contract.connect(addr1).grantRole(MINTER_ROLE, addr1.address)
