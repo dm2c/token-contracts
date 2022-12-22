@@ -70,6 +70,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.envrc
 .env.test
 
 # parcel-bundler cache (https://parceljs.org/)
@@ -102,3 +103,12 @@ dist
 
 # TernJS port file
 .tern-port
+
+#Hardhat files
+cache
+contracts/lib
+artifacts
+typechain
+
+# macos
+.DS_Store
