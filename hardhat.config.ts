@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { HttpNetworkAccountsConfig } from "hardhat/types";
 
 import "hardhat-typechain";
+import "solidity-coverage";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 require("hardhat-contract-sizer");

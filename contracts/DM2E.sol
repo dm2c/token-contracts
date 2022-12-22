@@ -21,24 +21,31 @@ contract DM2E is AccessControl, ERC20Pausable, ERC20Burnable {
         _mint(to, amount);
     }
 
-    function pause() external onlyRole(PAUSER_ROLE)  {
+    function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    function unpause() external onlyRole(PAUSER_ROLE)  {
+    function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
-    function burn(uint256 amount) public onlyRole(BURNER_ROLE) override {
+    function burn(uint256 amount) public override onlyRole(BURNER_ROLE) {
         _burn(_msgSender(), amount);
     }
 
-    function burnFrom(address account, uint256 amount) public onlyRole(BURNER_ROLE) override {
+    function burnFrom(
+        address account,
+        uint256 amount
+    ) public override onlyRole(BURNER_ROLE) {
         _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20, ERC20Pausable) {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override(ERC20, ERC20Pausable) {
         super._beforeTokenTransfer(from, to, amount);
     }
 }
