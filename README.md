@@ -59,11 +59,11 @@ $ npx hardhat test
 
 # Deployment Procedure
 ```
-npx hardhat compile
-npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
-npx hardhat run scripts/deploys/DM2E-deploy.ts --network mainnet
+$ npx hardhat compile
+$ npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
+$ npx hardhat run scripts/deploys/DM2E-deploy.ts --network mainnet
 ```
 
 ## Operation confirmed version
-・Node.js v16.15.1
-・npm 8.19.2
+ - Node.js v16.15.1
+ - npm 8.19.2
