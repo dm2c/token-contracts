@@ -30,15 +30,14 @@ contract DM2E is AccessControlEnumerable, ERC20Pausable, ERC20Burnable {
     }
 
     function burn(uint256 amount) public override onlyRole(BURNER_ROLE) {
-        _burn(_msgSender(), amount);
+        super.burn(amount);
     }
 
     function burnFrom(
         address account,
         uint256 amount
     ) public override onlyRole(BURNER_ROLE) {
-        _spendAllowance(account, _msgSender(), amount);
-        _burn(account, amount);
+        super.burnFrom(account, amount);
     }
 
     function _beforeTokenTransfer(
