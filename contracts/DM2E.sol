@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.16;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-contract DM2E is AccessControl, ERC20Pausable, ERC20Burnable {
+contract DM2E is AccessControlEnumerable, ERC20Pausable, ERC20Burnable {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -30,15 +30,14 @@ contract DM2E is AccessControl, ERC20Pausable, ERC20Burnable {
     }
 
     function burn(uint256 amount) public override onlyRole(BURNER_ROLE) {
-        _burn(_msgSender(), amount);
+        super.burn(amount);
     }
 
     function burnFrom(
         address account,
         uint256 amount
     ) public override onlyRole(BURNER_ROLE) {
-        _spendAllowance(account, _msgSender(), amount);
-        _burn(account, amount);
+        super.burnFrom(account, amount);
     }
 
     function _beforeTokenTransfer(
@@ -47,5 +46,16 @@ contract DM2E is AccessControl, ERC20Pausable, ERC20Burnable {
         uint256 amount
     ) internal virtual override(ERC20, ERC20Pausable) {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function _revokeRole(
+        bytes32 role,
+        address account
+    ) internal virtual override {
+        require(
+            getRoleMemberCount(role) > 1,
+            "AccessControl: each role must have at least 1 member"
+        );
+        super._revokeRole(role, account);
     }
 }
