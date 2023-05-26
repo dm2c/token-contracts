@@ -27,8 +27,8 @@ describe("testing for DM2E", async () => {
         addr1 = signers[1]
         addr2 = signers[2]
 
-        const Ephyra = await ethers.getContractFactory("DM2E");
-        contract = (await Ephyra.deploy()) as DM2E
+        const DM2E = await ethers.getContractFactory("DM2E");
+        contract = (await DM2E.deploy()) as DM2E
 
         await contract.mint(owner.address, initialSupply)
 
@@ -130,7 +130,15 @@ describe("testing for DM2E", async () => {
     // Non-admin pause
     it("Should fail when pause by non-admin", async function () {
       expect(
-        contract.connect(addr1).pause()
+          contract.connect(addr1).pause()
+      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`);
+    });
+
+    // Non-admin unpause
+    it("Should fail when unpause by non-admin", async function () {
+      await contract.pause()
+      expect(
+        contract.connect(addr1).unpause()
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`);
     });
   });

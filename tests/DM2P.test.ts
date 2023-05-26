@@ -146,6 +146,14 @@ describe("testing for DM2P", async () => {
         contract.connect(addr1).pause()
       ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`);
     });
+
+    // Non-admin unpause
+    it("Should fail when unpause by non-admin", async function () {
+      await contract.pause()
+      expect(
+          contract.connect(addr1).unpause()
+      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`);
+    });
   });
 
   describe("burn", async function () {
