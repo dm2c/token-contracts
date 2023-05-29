@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { HttpNetworkAccountsConfig } from "hardhat/types";
 
 import "hardhat-typechain";
+import "hardhat-watcher"
 import "solidity-coverage";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
@@ -83,6 +84,15 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: `${process.env.ETHERSCAN_API_KEY}`,
   },
+  watcher: {
+    test: {
+      tasks: [{ command: 'test', params: { testFiles: ['{path}'] } }],
+      files: ['./test/**/*'],
+      verbose: true,
+      clearOnStart: true,
+      start: 'echo Running my test task now..',
+    }
+  }
 };
 
 export default config;
