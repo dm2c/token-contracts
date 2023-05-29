@@ -54,14 +54,15 @@ Burner accounts can burn tokens from its own accounts. Burning tokens decreases 
 You should be able to install dependencies and then run tests:
 ```
 $ npm install
-$ npx hardhat test
+$ npx hardhat test test/DM2P.test.ts
 ```
 
 # Deployment Procedure
 ```
-$ npx hardhat compile
-$ npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
-$ npx hardhat run scripts/deploys/DM2E-deploy.ts --network mainnet
+npx hardhat compile
+npx hardhat test test/DM2P.test.ts
+# Fill in the contract address in DM2P: "" in scripts/common.ts
+npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
 ```
 
 ## Operation confirmed version

@@ -29,7 +29,7 @@ contract DM2E is AccessControlEnumerable, ERC20Pausable, ERC20Burnable {
         _grantRole(BURNER_ROLE, msg.sender);
     }
 
-    // Only the MINTER_ROLE account can mint new tokens up to the CAP_AMOUNT.
+    // Only the MINTER_ROLE account can mint new tokens.
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
