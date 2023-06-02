@@ -3,7 +3,13 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/finance/VestingWallet.sol";
 
+/**
+ * @notice Vesting Wallet which release is only allowed to beneficiary
+ */
 contract RestrictedVestingWallet is VestingWallet {
+    /**
+     * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
+     */
     constructor(
         address beneficiaryAddress,
         uint64 startTimestamp,
@@ -17,6 +23,11 @@ contract RestrictedVestingWallet is VestingWallet {
         );
         _;
     }
+
+    /**
+     * @dev This returns the amount vested, as a function of time, for
+     * an asset given its total historical allocation.
+     */
     function _vestingSchedule(uint256 totalAllocation, uint64 timestamp)
         internal
         view
