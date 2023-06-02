@@ -10,6 +10,13 @@ contract RestrictedVestingWallet is VestingWallet {
         uint64 durationSeconds
     ) VestingWallet(beneficiaryAddress, startTimestamp, durationSeconds) {}
 
+    modifier onlyBeneficiary() {
+        require(
+            _msgSender() == beneficiary(),
+            "RestrictedVestingWallet: caller is not the beneficiary"
+        );
+        _;
+    }
     function _vestingSchedule(uint256 totalAllocation, uint64 timestamp)
         internal
         view
@@ -26,11 +33,17 @@ contract RestrictedVestingWallet is VestingWallet {
         }
     }
 
-    function release(address token) public override {
-        require(
-            _msgSender() == beneficiary(),
-            "RestrictedVestingWallet: caller is not the beneficiary"
-        );
+    /**
+     * @dev Release the Eth, and can only be released by a beneficiary.
+     */
+    function release() public override onlyBeneficiary {
+        super.release();
+    }
+
+    /**
+     * @dev Release the tokens, and can only be released by a beneficiary.
+     */
+    function release(address token) public override onlyBeneficiary {
         super.release(token);
     }
 }
