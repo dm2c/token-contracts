@@ -5,6 +5,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import "./RestrictedVestingWallet.sol";
 
+/**
+ * @notice Minter mint the necessary amount of ERC20 tokens,
+ *      including DM2P and DM2E tokens in the Seamoon Protocol, at any given time.
+ *      Use the Vesting contract to lock up tokens minted via the minter contract for a specific period of time.
+ */
 contract Minter is Ownable {
     ERC20PresetMinterPauser public erc20;
     uint256 public capAmount;
@@ -14,8 +19,27 @@ contract Minter is Ownable {
     uint256 public vestingDuration;
     uint256 private mintedAmount;
 
+    /**
+     * @dev Emitted in mint()
+     *
+     * @param vestingWallet an address of the Vesting contract deployed in the minting process.
+     * @param amount an amount of tokens minted and locked.
+     */
     event Mint(address vestingWallet, uint256 amount);
 
+    /**
+     * @dev Creates an instance of Minter
+     *
+     * @param _erc20 ERC20 tokens to be minted.
+     * @param _capAmount The maximum amount of tokens that can be minted in this contract.
+     * @param _mintStart Mintable start time.
+     * @param _mintingDuration Locking period for this contract.
+     *      The amount of mint available increases linearly with the minting period from the mint start date and time.
+     * @param _lockingDuration Locking period for Vesting contract deployed through this contract.
+     *      After the locking period from minting, tokens can be withdrawn from the Vesting contract
+     *      in the amount corresponding to the vesting period.
+     * @param _vestingDuration Vesting period for Vesting contract.
+     */
     constructor(
         address _erc20,
         uint256 _capAmount,
@@ -36,6 +60,9 @@ contract Minter is Ownable {
         vestingDuration = _vestingDuration;
     }
 
+    /**
+     * @dev Get current mintable amount.
+     */
     function mintableAmount() public view returns (uint256) {
         return _mintingSchedule(uint64(block.timestamp)) - mintedAmount;
     }
@@ -54,6 +81,13 @@ contract Minter is Ownable {
         }
     }
 
+    /**
+     * @dev Mint the specified amount of tokens and locked into the Vesting contract,
+     *      which is created anew each time.
+     *
+     * @param beneficiary an address who is able to withdraw tokens from Vesting contract.
+     * @param amount an amount to mint.
+     */
     function mint(address beneficiary, uint256 amount) external onlyOwner {
         require(beneficiary != address(0), "Minter: zero address");
         require(amount > 0, "Minter: amount is zero");
