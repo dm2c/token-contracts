@@ -2,8 +2,8 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/finance/VestingWallet.sol";
 import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import "./RestrictedVestingWallet.sol";
 
 contract Minter is Ownable {
     ERC20PresetMinterPauser public erc20;
@@ -65,7 +65,7 @@ contract Minter is Ownable {
         );
 
         mintedAmount += amount;
-        VestingWallet vesting = new VestingWallet(
+        RestrictedVestingWallet vesting = new RestrictedVestingWallet(
             beneficiary,
             uint64(block.timestamp + lockingDuration),
             uint64(vestingDuration)
