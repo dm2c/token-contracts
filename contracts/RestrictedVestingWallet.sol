@@ -37,7 +37,7 @@ contract RestrictedVestingWallet is VestingWallet {
     {
         if (timestamp < start()) {
             return 0;
-        } else if (timestamp >= start() + duration()) {
+        } else if (timestamp >= start() + duration()) { // Avoid division by zero duration
             return totalAllocation;
         } else {
             return (totalAllocation * (timestamp - start())) / duration();
