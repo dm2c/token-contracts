@@ -93,6 +93,22 @@ describe("testing for Minter", async () => {
         expect(await minter.vestingDuration()).to.equal(400);
       });
 
+      // TODO unstable gas cost for coverage test
+      xit("gas cost", async () => {
+        current = Date.now();
+        const minter = await Minter.deploy(
+          token.address,
+          MOCK_CAP_AMOUNT,
+          current,
+          100,
+          200,
+          0
+        );
+        const tx = await minter.deployTransaction;
+        const receipt = await tx.wait();
+        expect(receipt.gasUsed).to.be.equal(1326390);
+      });
+
       it("even if vestingDuration is zero, it does not throw an error", async () => {
         current = Date.now();
         await expect(

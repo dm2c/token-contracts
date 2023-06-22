@@ -24,6 +24,34 @@ describe("VestingWallet", function () {
     await token.deployed();
   });
 
+  describe("release for ETH", () => {
+    beforeEach(async () => {
+      const VestingWallet = await ethers.getContractFactory(
+        "RestrictedVestingWallet"
+      );
+      const block = await ethers.provider.getBlock("latest");
+      const startTime = block.timestamp;
+      const duration = 1000;
+
+      vestingWallet = (await VestingWallet.deploy(
+        owner.address,
+        startTime,
+        duration
+      )) as RestrictedVestingWallet;
+      await vestingWallet.deployed();
+    });
+
+    it("only beneficiary can withdraw", async () => {
+      await vestingWallet["release()"]();
+    });
+
+    it("non beneficiary can not withdraw", async () => {
+      await expect(
+        vestingWallet.connect(other)["release()"]()
+      ).to.be.revertedWith("VestingWallet: caller is not the beneficiary");
+    });
+  });
+
   describe("withdraw", function () {
     it("only beneficiary can withdraw", async function () {
       const VestingWallet = await ethers.getContractFactory(

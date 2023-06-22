@@ -11,12 +11,12 @@ import "./RestrictedVestingWallet.sol";
  *      Use the Vesting contract to lock up tokens minted via the minter contract for a specific period of time.
  */
 contract Minter is Ownable {
-    ERC20PresetMinterPauser public erc20;
-    uint256 public capAmount;
-    uint256 public mintStart;
-    uint256 public mintingDuration;
-    uint256 public lockingDuration;
-    uint256 public vestingDuration;
+    ERC20PresetMinterPauser public immutable erc20;
+    uint256 public immutable capAmount;
+    uint256 public immutable mintStart;
+    uint256 public immutable mintingDuration;
+    uint256 public immutable lockingDuration;
+    uint256 public immutable vestingDuration;
     uint256 private mintedAmount;
 
     /**
