@@ -270,25 +270,25 @@ describe("testing for DM2P", async () => {
     it("Should fail when revokeRole DEFAULT_ADMIN_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).revokeRole(DEFAULT_ADMIN_ROLE, owner.address)
-      ).to.be.revertedWith("AccessControl: each role must have at least 1 member");
+      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
     });
 
     it("Should fail when renounceRole DEFAULT_ADMIN_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).renounceRole(DEFAULT_ADMIN_ROLE, owner.address)
-      ).to.be.revertedWith("AccessControl: each role must have at least 1 member");
+      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
     });
 
     it("Should fail when revokeRole MINTER_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).revokeRole(MINTER_ROLE, owner.address)
-      ).to.be.revertedWith("AccessControl: each role must have at least 1 member");
+      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
     });
 
     it("Should fail when renounceRole MINTER_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).renounceRole(MINTER_ROLE, owner.address)
-      ).to.be.revertedWith("AccessControl: each role must have at least 1 member");
+      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
     });
   });
 });
