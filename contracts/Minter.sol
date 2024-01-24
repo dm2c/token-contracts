@@ -7,7 +7,7 @@ import "./RestrictedVestingWallet.sol";
 
 /**
  * @notice Minter mint the necessary amount of ERC20 tokens,
- *      including DM2P and DM2E tokens in the Seamoon Protocol, at any given time.
+ *      including DM2P tokens in the Seamoon Protocol, at any given time.
  *      Use the Vesting contract to lock up tokens minted via the minter contract for a specific period of time.
  */
 contract Minter is Ownable {

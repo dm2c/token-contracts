@@ -1,16 +1,14 @@
 # Token Contracts
 
-This repository contains the source code for the DM2P and DM2E token contracts.
+This repository contains the source code for the DM2P token and related contracts.
 
 ## Token Types
 
 | Name | Symbol | Decimals | Capped Supply | Mintable | Burnable | Pausable |
 | --- | --- | --- | --- | --- | --- | --- |
 | DM2P | DM2P | 18 | 1e10 | Yes | Yes | Yes |
-| DM2E | DM2E | 18 | No | Yes | Yes | Yes |
 
  - DM2P is a governance token that is capped.
- - DM2E is an utility token that is not capped.
 
 ## ERC20
 The following features will be determined at deploy time, locking them in place.
