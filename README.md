@@ -71,4 +71,5 @@ npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
 
 ## Audit
 
-Past audits can be found in audits/.
+Past audits can be found in [`audits/`](./audits).
+
