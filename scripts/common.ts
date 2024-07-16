@@ -10,7 +10,6 @@ const keyId = process.env.KMS_KEY_ID!;
 
 interface AddressesType {
   DM2P: string;
-  DM2E: string;
 }
 
 export const address = (name: string): string => {
@@ -34,19 +33,16 @@ export const Addresses = () => {
     case "goeril":
       return {
         DM2P: "",
-        DM2E: "",
       } as AddressesType;
 
     case "mainnet":
       return {
         DM2P: "",
-        DM2E: "",
       } as AddressesType;
 
     case "mumbai":
       return {
         DM2P: "",
-        DM2E: "",
       } as AddressesType;
 
     case "matic":
