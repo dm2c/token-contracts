@@ -2,6 +2,8 @@
 
 This repository contains the source code for the DM2P token and related contracts.
 
+See [this whitepaper](https://docs.seamoon.dmm.com/whitepaper/v/en/) for the entire Seamoon Protocol ecosystem that uses DM2P token. 
+
 ## Token Types
 
 | Name | Symbol | Decimals | Capped Supply | Mintable | Burnable | Pausable |
