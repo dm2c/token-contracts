@@ -68,3 +68,8 @@ npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
 ## Operation confirmed version
  - Node.js v16.15.1
  - npm 8.19.2
+
+## Audit
+
+Past audits can be found in [`audits/`](./audits).
+
