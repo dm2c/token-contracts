@@ -85,7 +85,7 @@ contract DM2P is
     ) internal virtual override {
         require(
             getRoleMemberCount(role) > 1,
-            "AccessControl: each role must have at least 1 member"
+            "DM2P: each role must have at least 1 member"
         );
         super._revokeRole(role, account);
     }
