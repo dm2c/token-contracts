@@ -18,45 +18,18 @@ const accounts = (): HttpNetworkAccountsConfig => {
 };
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "hardhat",
   networks: {
-    hardhat: {},
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_KEY}`,
-      chainId: 3,
-      gas: 850000,
-      gasPrice: 1000000001,
-    },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`,
-      chainId: 4,
-      //gas: 850000,
-      //gasPrice: 1000000001,
-    },
-    goeril: {
-      url: `https://goerli.infura.io/v3/${process.env.INFURA_KEY}`,
-      chainId: 5,
-      gas: 850000,
-      gasPrice: 1000000001,
-    },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`,
-      chainId: 1,
-      gasPrice: 50000000001,
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
     },
-    mumbai: {
-      // matic testnet
-      url: "https://rpc-mumbai.maticvigil.com/",
-      chainId: 80001,
-      // gas: 850000,
-      // gasPrice: 8000000001,
-    },
-    matic: {
-      url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`,
-      chainId: 137,
-      gas: 8500000,
-      timeout: 20000,
-      gasPrice: 200000000000,
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.INFURA_KEY}`,
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
     },
   },
   solidity: {
