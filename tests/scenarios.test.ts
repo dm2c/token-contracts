@@ -223,7 +223,7 @@ describe("scenarios", async () => {
     expect(await minter.mintableAmount()).to.equal(ethers.parseEther("0.5"));
     let tx = await minter.mint(beneficiary.address, ethers.parseEther("0.5"));
     let receipt = await tx.wait();
-    const events: EventLog[] = receipt?.logs;
+    const events = receipt?.logs as EventLog[];
     let vestingAddress: string = events?.[1].args?.[0];
     expect(await token.balanceOf(vestingAddress)).to.equal(
       ethers.parseEther("0.5")

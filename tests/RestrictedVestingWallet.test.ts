@@ -1,8 +1,7 @@
 import { ethers, network } from "hardhat";
-import { expect } from "chai";
+import { assert, expect } from "chai";
 import { RestrictedVestingWallet } from "typechain";
 import { DM2P } from "typechain";
-import { BigNumber } from "@ethersproject/bignumber";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("VestingWallet", function () {
@@ -13,7 +12,6 @@ describe("VestingWallet", function () {
 
   const decimals = 10n ** 18n;
   const initialSupply = 5n * 10n ** 9n * decimals;
-  const capAmount = 10n ** 10n * decimals;
 
   beforeEach(async function () {
     [owner, other] = await ethers.getSigners();
@@ -29,6 +27,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -60,6 +59,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -92,6 +92,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -127,6 +128,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -148,6 +150,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -174,6 +177,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp + 100;
       const duration = 0;
 
@@ -194,6 +198,7 @@ describe("VestingWallet", function () {
       await vestingWallet["release(address)"](await token.getAddress());
       expect(await token.balanceOf(owner.address)).to.equal(initialSupply);
       const block2 = await ethers.provider.getBlock("latest");
+      assert(block2 !== null);
       expect(startTime).to.equal(block2.timestamp);
     });
   });
