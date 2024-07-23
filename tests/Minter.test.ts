@@ -1,7 +1,5 @@
-import "@nomiclabs/hardhat-waffle";
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import {
   DM2P,
   Minter,
@@ -9,21 +7,21 @@ import {
   RestrictedVestingWallet,
   RestrictedVestingWallet__factory,
 } from "typechain";
-import { BigNumber } from "@ethersproject/bignumber";
-import { Event } from "@ethersproject/contracts";
 import { beforeEach } from "mocha";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { Log, EventLog } from "ethers";
 
 let owner: SignerWithAddress;
 let addr1: SignerWithAddress;
 let addr2: SignerWithAddress;
 let beneficiary: SignerWithAddress;
-let initialOwnerBalance: BigNumber;
+let initialOwnerBalance: bigint;
 
-const decimals = BigNumber.from(10).pow(18);
-const initialSupply = BigNumber.from(5 * 1e9).mul(decimals);
+const decimals: bigint = 10n ** 18n;
+const initialSupply: bigint = 5n * 10n ** 9n * decimals;
 
-const MOCK_CAP_AMOUNT = ethers.utils.parseEther("1");
+const MOCK_CAP_AMOUNT = ethers.parseEther("1");
 const MOCK_MINT_START = 100;
 const MOCK_MINTING_DURATION = 200;
 const MOCK_LOCKING_DURATION = 300;
@@ -38,7 +36,7 @@ describe("testing for Minter", async () => {
   let token: DM2P;
   let minter: Minter;
   let current: number;
-  let events: Event[] | undefined;
+  let events: EventLog[] | undefined;
 
   beforeEach(async () => {
     const signers = await ethers.getSigners();
@@ -52,7 +50,7 @@ describe("testing for Minter", async () => {
       "VestingWallet"
     )) as RestrictedVestingWallet__factory;
     const DM2P = await ethers.getContractFactory("DM2P");
-    token = (await DM2P.deploy()) as DM2P;
+    token = await DM2P.deploy();
     await token.mint(owner.address, initialSupply);
 
     initialOwnerBalance = await token.balanceOf(owner.address);
@@ -60,20 +58,20 @@ describe("testing for Minter", async () => {
     const block = await ethers.provider.getBlock("latest");
     current = block.timestamp;
     minter = (await Minter.deploy(
-      token.address,
+      await token.getAddress(),
       MOCK_CAP_AMOUNT,
       current + MOCK_MINT_START,
       MOCK_MINTING_DURATION,
       MOCK_LOCKING_DURATION,
       MOCK_VESTING_DURATION
     )) as Minter;
-    await token.grantRole(MINTER_ROLE, minter.address);
+    await token.grantRole(MINTER_ROLE, await minter.getAddress());
   });
 
   describe("constructor", () => {
     describe("success", () => {
       it("set token address", async () => {
-        expect(await minter.erc20()).to.equal(token.address);
+        expect(await minter.erc20()).to.equal(await token.getAddress());
       });
 
       it("set capAmount state", async () => {
@@ -97,22 +95,29 @@ describe("testing for Minter", async () => {
       xit("gas cost", async () => {
         current = Date.now();
         const minter = await Minter.deploy(
-          token.address,
+          await token.getAddress(),
           MOCK_CAP_AMOUNT,
           current,
           100,
           200,
           0
         );
-        const tx = await minter.deployTransaction;
-        const receipt = await tx.wait();
-        expect(receipt.gasUsed).to.be.equal(1326390);
+        const tx = await minter.deploymentTransaction();
+        const receipt = await tx?.wait();
+        expect(receipt?.gasUsed).to.be.equal(1326390);
       });
 
       it("even if vestingDuration is zero, it does not throw an error", async () => {
         current = Date.now();
         await expect(
-          Minter.deploy(token.address, MOCK_CAP_AMOUNT, current, 100, 200, 0)
+          Minter.deploy(
+            await token.getAddress(),
+            MOCK_CAP_AMOUNT,
+            current,
+            100,
+            200,
+            0
+          )
         ).not.to.be.reverted;
       });
     });
@@ -120,19 +125,19 @@ describe("testing for Minter", async () => {
     describe("errors", () => {
       it("if token address is zero, it throws an error", async () => {
         await expect(
-          Minter.deploy(ethers.constants.AddressZero, 100, 100, 100, 100, 100)
+          Minter.deploy(ethers.ZeroAddress, 100, 100, 100, 100, 100)
         ).to.be.revertedWith("Minter: zero address");
       });
 
       it("if capAmount is zero, it throws an error", async () => {
         await expect(
-          Minter.deploy(token.address, 0, 100, 100, 100, 100)
+          Minter.deploy(await token.getAddress(), 0, 100, 100, 100, 100)
         ).to.be.revertedWith("Minter: cap amount is zero");
       });
 
       it("if mintStart is zero, it throws an error", async () => {
         await expect(
-          Minter.deploy(token.address, 100, 0, 100, 100, 100)
+          Minter.deploy(await token.getAddress(), 100, 0, 100, 100, 100)
         ).to.be.revertedWith("Minter: mint start is zero");
       });
     });
@@ -151,15 +156,15 @@ describe("testing for Minter", async () => {
         expect(await minter.mintableAmount()).to.equal(MOCK_CAP_AMOUNT);
         const tx = await minter.mint(beneficiary.address, MOCK_CAP_AMOUNT);
         const receipt = await tx.wait();
-        events = receipt.events;
+        events = receipt?.logs;
 
         vestingAddress = events?.[1].args?.[0];
-        vestingWallet = await VestingWallet.attach(vestingAddress);
+        vestingWallet = VestingWallet.attach(vestingAddress);
       });
 
       it("emits Mint event", async () => {
         expect(events?.length).to.equal(2);
-        expect(events?.[1].address).to.equal(minter.address);
+        expect(events?.[1].address).to.equal(await minter.getAddress());
         expect(events?.[1].eventSignature).to.equal("Mint(address,uint256)");
       });
 
@@ -168,9 +173,9 @@ describe("testing for Minter", async () => {
       });
 
       it("mint tokens to vesting wallet", async () => {
-        expect(await token.balanceOf(vestingWallet.address)).to.equal(
-          MOCK_CAP_AMOUNT
-        );
+        expect(
+          await token.balanceOf(await vestingWallet.getAddress())
+        ).to.equal(MOCK_CAP_AMOUNT);
       });
 
       it("beneficiary of new vesting wallet is equal to given arg", async () => {
@@ -188,14 +193,14 @@ describe("testing for Minter", async () => {
         const block = await ethers.provider.getBlock("latest");
         current = block.timestamp;
         minter = (await Minter.deploy(
-          token.address,
+          await token.getAddress(),
           MOCK_CAP_AMOUNT,
           current + MOCK_MINT_START,
           MOCK_MINTING_DURATION,
           MOCK_LOCKING_DURATION,
           MOCK_VESTING_DURATION
         )) as Minter;
-        await token.grantRole(MINTER_ROLE, minter.address);
+        await token.grantRole(MINTER_ROLE, await minter.getAddress());
 
         expect(await minter.mintableAmount()).to.equal(0);
 
@@ -206,40 +211,38 @@ describe("testing for Minter", async () => {
         // 1% is mintable
         await time.increaseTo(current + 102);
         expect(await minter.mintableAmount()).to.equal(
-          ethers.utils.parseEther("0.01")
+          ethers.parseEther("0.01")
         );
 
         // 10% is mintable
         await time.increaseTo(current + 120);
         expect(await minter.mintableAmount()).to.equal(
-          ethers.utils.parseEther("0.1")
+          ethers.parseEther("0.1")
         );
 
         // 50% is mintable
         await time.increaseTo(current + 200);
         expect(await minter.mintableAmount()).to.equal(
-          ethers.utils.parseEther("0.5")
+          ethers.parseEther("0.5")
         );
 
         // 100% is mintable
         await time.increaseTo(current + 300);
-        expect(await minter.mintableAmount()).to.equal(
-          ethers.utils.parseEther("1")
-        );
+        expect(await minter.mintableAmount()).to.equal(ethers.parseEther("1"));
       });
 
       it("if minting duration is passed, all token is mintable", async () => {
         const block = await ethers.provider.getBlock("latest");
         current = block.timestamp;
         minter = (await Minter.deploy(
-          token.address,
+          await token.getAddress(),
           MOCK_CAP_AMOUNT,
           current + MOCK_MINT_START,
           MOCK_MINTING_DURATION,
           MOCK_LOCKING_DURATION,
           MOCK_VESTING_DURATION
         )) as Minter;
-        await token.grantRole(MINTER_ROLE, minter.address);
+        await token.grantRole(MINTER_ROLE, await minter.getAddress());
 
         expect(await minter.mintableAmount()).to.equal(0);
         await time.increaseTo(current + 400);
@@ -260,23 +263,23 @@ describe("testing for Minter", async () => {
       it("if mintStart is future, it throws an error", async () => {
         const block = await ethers.provider.getBlock("latest");
         minter = (await Minter.deploy(
-          token.address,
+          await token.getAddress(),
           MOCK_CAP_AMOUNT,
           block.timestamp + 1000,
           block.timestamp + 1000,
           block.timestamp + 1000,
           block.timestamp + 1000
         )) as Minter;
-        await token.grantRole(MINTER_ROLE, minter.address);
+        await token.grantRole(MINTER_ROLE, await minter.getAddress());
         await expect(minter.mint(beneficiary.address, 100)).to.be.revertedWith(
           "Minter: mint is not started"
         );
       });
 
       it("if beneficiary is zero, it throws an error", async () => {
-        await expect(
-          minter.mint(ethers.constants.AddressZero, 100)
-        ).to.be.revertedWith("Minter: zero address");
+        await expect(minter.mint(ethers.ZeroAddress, 100)).to.be.revertedWith(
+          "Minter: zero address"
+        );
       });
 
       it("if amount is zero, it throws an error", async () => {
@@ -290,7 +293,7 @@ describe("testing for Minter", async () => {
           current + MOCK_MINT_START + MOCK_MINTING_DURATION
         );
         await expect(
-          minter.mint(beneficiary.address, MOCK_CAP_AMOUNT.add(1))
+          minter.mint(beneficiary.address, MOCK_CAP_AMOUNT + 1n)
         ).to.be.revertedWith("Minter: minting amount is greater than mintable");
       });
 
@@ -298,9 +301,9 @@ describe("testing for Minter", async () => {
         await time.increaseTo(
           current + MOCK_MINT_START + MOCK_MINTING_DURATION
         );
-        await minter.mint(beneficiary.address, MOCK_CAP_AMOUNT.div(2));
+        await minter.mint(beneficiary.address, MOCK_CAP_AMOUNT / 2n);
         await expect(
-          minter.mint(beneficiary.address, MOCK_CAP_AMOUNT.div(2).add(1))
+          minter.mint(beneficiary.address, MOCK_CAP_AMOUNT / 2n + 1n)
         ).to.be.revertedWith("Minter: minting amount is greater than mintable");
       });
 
@@ -326,47 +329,37 @@ describe("testing for Minter", async () => {
     // deploy minter
     const block = await ethers.provider.getBlock("latest");
     current = block.timestamp;
-    minter = (await Minter.deploy(
-      token.address,
+    minter = await Minter.deploy(
+      await token.getAddress(),
       MOCK_CAP_AMOUNT,
       current + MOCK_MINT_START,
       MOCK_MINTING_DURATION,
       MOCK_LOCKING_DURATION,
       MOCK_VESTING_DURATION
-    )) as Minter;
-    await token.grantRole(MINTER_ROLE, minter.address);
+    );
+    await token.grantRole(MINTER_ROLE, await minter.getAddress());
 
     // mint token and lock tokens into vesting wallet
     let mintTimestamp = current + MOCK_MINT_START + MOCK_MINTING_DURATION / 2;
     await time.increaseTo(mintTimestamp);
-    expect(await minter.mintableAmount()).to.equal(
-      ethers.utils.parseEther("0.5")
-    );
-    let tx = await minter.mint(
-      beneficiary.address,
-      ethers.utils.parseEther("0.5")
-    );
+    expect(await minter.mintableAmount()).to.equal(ethers.parseEther("0.5"));
+    let tx = await minter.mint(beneficiary.address, ethers.parseEther("0.5"));
     let receipt = await tx.wait();
-    events = receipt.events;
+    events = receipt?.logs;
     let vestingAddress1: string = events?.[1].args?.[0];
     let vestingWallet1: RestrictedVestingWallet = await VestingWallet.attach(
       vestingAddress1
     );
-    expect(await token.balanceOf(vestingWallet1.address)).to.equal(
-      ethers.utils.parseEther("0.5")
+    expect(await token.balanceOf(await vestingWallet1.getAddress())).to.equal(
+      ethers.parseEther("0.5")
     );
 
     // mint again and lock tokens with newly deployed vesting wallet
     await time.increaseTo(mintTimestamp + 50);
-    expect(await minter.mintableAmount()).to.equal(
-      ethers.utils.parseEther("0.25")
-    );
-    tx = await minter.mint(
-      beneficiary.address,
-      ethers.utils.parseEther("0.25")
-    );
+    expect(await minter.mintableAmount()).to.equal(ethers.parseEther("0.25"));
+    tx = await minter.mint(beneficiary.address, ethers.parseEther("0.25"));
     receipt = await tx.wait();
-    events = receipt.events;
+    events = receipt?.logs;
     let vestingAddress2: string = events?.[1].args?.[0];
     let vestingWallet2: RestrictedVestingWallet = await VestingWallet.attach(
       vestingAddress2
@@ -374,21 +367,16 @@ describe("testing for Minter", async () => {
     expect(vestingAddress1.toLowerCase()).to.not.equal(
       vestingAddress2.toLowerCase()
     );
-    expect(await token.balanceOf(vestingWallet2.address)).to.equal(
-      ethers.utils.parseEther("0.25")
+    expect(await token.balanceOf(await vestingWallet2.getAddress())).to.equal(
+      ethers.parseEther("0.25")
     );
 
     // mint tokens up to minter cap amount
     await time.increaseTo(mintTimestamp + 100);
-    expect(await minter.mintableAmount()).to.equal(
-      ethers.utils.parseEther("0.25")
-    );
-    tx = await minter.mint(
-      beneficiary.address,
-      ethers.utils.parseEther("0.25")
-    );
+    expect(await minter.mintableAmount()).to.equal(ethers.parseEther("0.25"));
+    tx = await minter.mint(beneficiary.address, ethers.parseEther("0.25"));
     receipt = await tx.wait();
-    events = receipt.events;
+    events = receipt?.logs;
     let vestingAddress3: string = events?.[1].args?.[0];
     let vestingWallet3: RestrictedVestingWallet = await VestingWallet.attach(
       vestingAddress3
@@ -396,39 +384,40 @@ describe("testing for Minter", async () => {
     expect(vestingAddress2.toLowerCase()).to.not.equal(
       vestingAddress3.toLowerCase()
     );
-    expect(await token.balanceOf(vestingWallet3.address)).to.equal(
-      ethers.utils.parseEther("0.25")
+    expect(await token.balanceOf(await vestingWallet3.getAddress())).to.equal(
+      ethers.parseEther("0.25")
     );
-    expect(await minter.mintableAmount()).to.equal(
-      ethers.utils.parseEther("0")
-    );
+    expect(await minter.mintableAmount()).to.equal(ethers.parseEther("0"));
 
     // no tokens are releasable yet
     tx = await vestingWallet1
       .connect(beneficiary)
-      ["release(address)"](token.address);
+      ["release(address)"](await token.getAddress());
     receipt = await tx.wait();
-    events = receipt.events;
+    events = receipt?.logs;
     let releasedEvent = events?.[0]!!;
     expect(releasedEvent.eventSignature).to.equal(
       "ERC20Released(address,uint256)"
     );
-    expect(releasedEvent.args?.[0]).to.equal(token.address);
+    expect(releasedEvent.args?.[0]).to.equal(await token.getAddress());
     expect(releasedEvent.args?.[1]).to.equal(0);
 
     // release from vesting wallet
     await time.increaseTo(mintTimestamp + MOCK_LOCKING_DURATION + 100);
     tx = await vestingWallet1
       .connect(beneficiary)
-      ["release(address)"](token.address);
+      ["release(address)"](await token.getAddress());
     receipt = await tx.wait();
-    events = receipt.events;
+    events = receipt?.logs;
     releasedEvent = events?.[0]!!;
     expect(releasedEvent.eventSignature).to.equal(
       "ERC20Released(address,uint256)"
     );
-    expect(releasedEvent.args?.[0]).to.equal(token.address);
-    expect(releasedEvent.args?.[1]).to.equal(ethers.utils.parseEther("0.125"));
+    expect(releasedEvent.args?.[0]).to.equal(await token.getAddress());
+    expect(releasedEvent.args?.[1]).to.equal(ethers.parseEther("0.125"));
+    expect(await token.balanceOf(beneficiary.address)).to.equal(
+      "125000000000000000"
+    );
 
     // release
     await time.increaseTo(
@@ -436,21 +425,22 @@ describe("testing for Minter", async () => {
     );
     tx = await vestingWallet1
       .connect(beneficiary)
-      ["release(address)"](token.address);
+      ["release(address)"](await token.getAddress());
     receipt = await tx.wait();
-    events = receipt.events;
+    events = receipt?.logs;
     releasedEvent = events?.[0]!!;
     expect(releasedEvent.eventSignature).to.equal(
       "ERC20Released(address,uint256)"
     );
-    expect(releasedEvent.args?.[0]).to.equal(token.address);
-    expect(releasedEvent.args?.[1]).to.equal(ethers.utils.parseEther("0.375"));
+    expect(releasedEvent.args?.[0]).to.equal(await token.getAddress());
+    expect(releasedEvent.args?.[1]).to.equal(ethers.parseEther("0.375"));
+    expect(await token.balanceOf(beneficiary.address)).to.equal(
+      "500000000000000000"
+    );
 
     // mint is unavailable tokens up to minter cap amount even if time is passed
     await time.increaseTo(mintTimestamp + 1000);
-    expect(await minter.mintableAmount()).to.equal(
-      ethers.utils.parseEther("0")
-    );
+    expect(await minter.mintableAmount()).to.equal(ethers.parseEther("0"));
     await expect(minter.mint(beneficiary.address, 1)).to.be.revertedWith(
       "Minter: minting amount is greater than mintable"
     );
