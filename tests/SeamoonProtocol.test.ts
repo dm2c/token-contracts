@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { DM2P } from "typechain";
+import { SeamoonProtocol } from "typechain";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 let owner: SignerWithAddress;
@@ -21,8 +21,8 @@ const PAUSER_ROLE =
 const BURNER_ROLE =
   "0x3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848";
 
-describe("testing for DM2P", async () => {
-  let contract: DM2P;
+describe("testing for SeamoonProtocol", async () => {
+  let contract: SeamoonProtocol;
 
   beforeEach(async () => {
     const signers = await ethers.getSigners();
@@ -30,8 +30,8 @@ describe("testing for DM2P", async () => {
     addr1 = signers[1];
     addr2 = signers[2];
 
-    const DM2PFactory = await ethers.getContractFactory("DM2P");
-    contract = await DM2PFactory.deploy();
+    const SMPFactory = await ethers.getContractFactory("SeamoonProtocol");
+    contract = await SMPFactory.deploy();
 
     await contract.mint(owner.address, initialSupply);
 
@@ -295,25 +295,33 @@ describe("testing for DM2P", async () => {
     it("Should fail when revokeRole DEFAULT_ADMIN_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).revokeRole(DEFAULT_ADMIN_ROLE, owner.address)
-      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
+      ).to.be.revertedWith(
+        "SeamoonProtocol: each role must have at least 1 member"
+      );
     });
 
     it("Should fail when renounceRole DEFAULT_ADMIN_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).renounceRole(DEFAULT_ADMIN_ROLE, owner.address)
-      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
+      ).to.be.revertedWith(
+        "SeamoonProtocol: each role must have at least 1 member"
+      );
     });
 
     it("Should fail when revokeRole MINTER_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).revokeRole(MINTER_ROLE, owner.address)
-      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
+      ).to.be.revertedWith(
+        "SeamoonProtocol: each role must have at least 1 member"
+      );
     });
 
     it("Should fail when renounceRole MINTER_ROLE by last admin", async function () {
       expect(
         contract.connect(owner).renounceRole(MINTER_ROLE, owner.address)
-      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
+      ).to.be.revertedWith(
+        "SeamoonProtocol: each role must have at least 1 member"
+      );
     });
   });
 });
