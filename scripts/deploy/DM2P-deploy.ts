@@ -1,25 +1,20 @@
-
-import { ethers } from 'hardhat'
-import { KmsSigner } from "../common"
-import { DM2P } from "typechain"
+import { ethers } from "hardhat";
+import { DM2P } from "typechain";
 
 const main = async () => {
-    const signer = KmsSigner()
-    const DM2P = await ethers.getContractFactory("DM2P");
+  const [deployer] = await ethers.getSigners();
+  const DM2P = await ethers.getContractFactory("DM2P");
 
-    const contract = (await DM2P.connect(signer).deploy({gasLimit:  2000000})) as DM2P
-    await contract.deployed();
+  const contract = (await DM2P.connect(deployer).deploy()) as DM2P;
+  await contract.waitForDeployment();
 
-    console.log('deployed txHash:', contract.deployTransaction.hash);
-    console.log('deployed address:', contract.address);
-
-}
+  console.log("deployed txHash:", contract.deploymentTransaction()?.hash);
+  console.log("deployed address:", await contract.getAddress());
+};
 
 main()
-    .then(() => process.exit(0))
-    .catch(error => {
-        console.error(error);
-        process.exit(1);
-    });
-
-
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
