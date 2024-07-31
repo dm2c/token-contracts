@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
  * Under normal circumstances, all tokens will be
  * minted when the token contract is deployed,
  * and no further operations will be performed to
- * change the total suppy.
+ * change the total supply.
  */
 contract DM2P is
     AccessControlEnumerable,
