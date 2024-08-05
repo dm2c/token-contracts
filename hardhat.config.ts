@@ -1,12 +1,16 @@
 import { HardhatUserConfig } from "hardhat/config";
 import { HttpNetworkAccountsConfig } from "hardhat/types";
 
-import "hardhat-typechain";
-import "hardhat-watcher"
+import "@typechain/hardhat";
+import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-verify";
+import "hardhat-watcher";
 import "solidity-coverage";
-import "@nomiclabs/hardhat-waffle";
-import "@nomiclabs/hardhat-etherscan";
+import { configDotenv } from "dotenv";
 require("hardhat-contract-sizer");
+configDotenv();
 
 import "solc";
 
@@ -59,13 +63,17 @@ const config: HardhatUserConfig = {
   },
   watcher: {
     test: {
-      tasks: [{ command: 'test', params: { testFiles: ['{path}'] } }],
-      files: ['./test/**/*'],
+      tasks: [{ command: "test", params: { testFiles: ["{path}"] } }],
+      files: ["./test/**/*"],
       verbose: true,
       clearOnStart: true,
-      start: 'echo Running my test task now..',
-    }
-  }
+      start: "echo Running my test task now..",
+    },
+  },
+  typechain: {
+    outDir: "typechain",
+    target: "ethers-v6",
+  },
 };
 
 export default config;

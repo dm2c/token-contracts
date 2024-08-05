@@ -1,10 +1,8 @@
-import "@nomiclabs/hardhat-waffle";
 import { ethers, network } from "hardhat";
-import { expect } from "chai";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { assert, expect } from "chai";
 import { RestrictedVestingWallet } from "typechain";
 import { DM2P } from "typechain";
-import { BigNumber } from "@ethersproject/bignumber";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("VestingWallet", function () {
   let owner: SignerWithAddress;
@@ -12,16 +10,15 @@ describe("VestingWallet", function () {
   let token: DM2P;
   let vestingWallet: RestrictedVestingWallet;
 
-  const decimals = BigNumber.from(10).pow(18);
-  const initialSupply = BigNumber.from(5).mul(1e9).mul(decimals);
-  const capAmount = BigNumber.from(1e10).mul(decimals);
+  const decimals = 10n ** 18n;
+  const initialSupply = 5n * 10n ** 9n * decimals;
 
   beforeEach(async function () {
     [owner, other] = await ethers.getSigners();
 
-    const Polyp = await ethers.getContractFactory("DM2P");
-    token = (await Polyp.deploy()) as DM2P;
-    await token.deployed();
+    const DM2P = await ethers.getContractFactory("DM2P");
+    token = await DM2P.deploy();
+    await token.waitForDeployment();
   });
 
   describe("release for ETH", () => {
@@ -30,6 +27,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -38,7 +36,8 @@ describe("VestingWallet", function () {
         startTime,
         duration
       )) as RestrictedVestingWallet;
-      await vestingWallet.deployed();
+
+      await vestingWallet.waitForDeployment();
     });
 
     it("only beneficiary can withdraw", async () => {
@@ -48,7 +47,9 @@ describe("VestingWallet", function () {
     it("non beneficiary can not withdraw", async () => {
       await expect(
         vestingWallet.connect(other)["release()"]()
-      ).to.be.revertedWith("VestingWallet: caller is not the beneficiary");
+      ).to.be.revertedWith(
+        "RestrictedVestingWallet: caller is not the beneficiary"
+      );
     });
   });
 
@@ -58,6 +59,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -66,9 +68,9 @@ describe("VestingWallet", function () {
         startTime,
         duration
       )) as RestrictedVestingWallet;
-      await vestingWallet.deployed();
+      await vestingWallet.waitForDeployment();
 
-      await token.mint(vestingWallet.address, initialSupply);
+      await token.mint(await vestingWallet.getAddress(), initialSupply);
 
       await network.provider.send("evm_setNextBlockTimestamp", [
         startTime + duration - 1,
@@ -76,8 +78,12 @@ describe("VestingWallet", function () {
       await network.provider.send("evm_mine");
 
       await expect(
-        vestingWallet.connect(other)["release(address)"](token.address)
-      ).to.be.revertedWith("VestingWallet: caller is not the beneficiary");
+        vestingWallet
+          .connect(other)
+          ["release(address)"](await token.getAddress())
+      ).to.be.revertedWith(
+        "RestrictedVestingWallet: caller is not the beneficiary"
+      );
       expect(await token.balanceOf(owner.address)).to.equal(0);
     });
 
@@ -86,6 +92,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -94,19 +101,17 @@ describe("VestingWallet", function () {
         startTime,
         duration
       )) as RestrictedVestingWallet;
-      await vestingWallet.deployed();
+      await vestingWallet.waitForDeployment();
 
-      await token.mint(vestingWallet.address, initialSupply);
+      await token.mint(await vestingWallet.getAddress(), initialSupply);
 
       await network.provider.send("evm_setNextBlockTimestamp", [
         startTime + duration / 2 - 1,
       ]);
       await network.provider.send("evm_mine", []);
 
-      await vestingWallet["release(address)"](token.address);
-      expect(await token.balanceOf(owner.address)).to.equal(
-        initialSupply.div(2)
-      );
+      await vestingWallet["release(address)"](await token.getAddress());
+      expect(await token.balanceOf(owner.address)).to.equal(initialSupply / 2n);
       const block2 = await ethers.provider.getBlock("latest");
 
       await network.provider.send("evm_setNextBlockTimestamp", [
@@ -114,7 +119,7 @@ describe("VestingWallet", function () {
       ]);
       await network.provider.send("evm_mine", []);
 
-      await vestingWallet["release(address)"](token.address);
+      await vestingWallet["release(address)"](await token.getAddress());
       expect(await token.balanceOf(owner.address)).to.equal(initialSupply);
     });
 
@@ -123,6 +128,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -131,11 +137,11 @@ describe("VestingWallet", function () {
         startTime + 1000,
         duration
       )) as RestrictedVestingWallet;
-      await vestingWallet.deployed();
+      await vestingWallet.waitForDeployment();
 
-      await token.mint(vestingWallet.address, initialSupply);
+      await token.mint(await vestingWallet.getAddress(), initialSupply);
 
-      await vestingWallet["release(address)"](token.address);
+      await vestingWallet["release(address)"](await token.getAddress());
       expect(await token.balanceOf(owner.address)).to.equal(0);
     });
 
@@ -144,6 +150,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp;
       const duration = 1000;
 
@@ -152,16 +159,16 @@ describe("VestingWallet", function () {
         startTime,
         duration
       )) as RestrictedVestingWallet;
-      await vestingWallet.deployed();
+      await vestingWallet.waitForDeployment();
 
-      await token.mint(vestingWallet.address, initialSupply);
+      await token.mint(await vestingWallet.getAddress(), initialSupply);
 
       await network.provider.send("evm_setNextBlockTimestamp", [
         startTime + duration,
       ]);
       await network.provider.send("evm_mine", []);
 
-      await vestingWallet["release(address)"](token.address);
+      await vestingWallet["release(address)"](await token.getAddress());
       expect(await token.balanceOf(owner.address)).to.equal(initialSupply);
     });
 
@@ -170,6 +177,7 @@ describe("VestingWallet", function () {
         "RestrictedVestingWallet"
       );
       const block = await ethers.provider.getBlock("latest");
+      assert(block !== null);
       const startTime = block.timestamp + 100;
       const duration = 0;
 
@@ -178,18 +186,19 @@ describe("VestingWallet", function () {
         startTime,
         duration
       )) as RestrictedVestingWallet;
-      await vestingWallet.deployed();
+      await vestingWallet.waitForDeployment();
 
-      await token.mint(vestingWallet.address, initialSupply);
+      await token.mint(await vestingWallet.getAddress(), initialSupply);
 
       await network.provider.send("evm_setNextBlockTimestamp", [
         startTime + duration - 1,
       ]);
       await network.provider.send("evm_mine", []);
 
-      await vestingWallet["release(address)"](token.address);
+      await vestingWallet["release(address)"](await token.getAddress());
       expect(await token.balanceOf(owner.address)).to.equal(initialSupply);
       const block2 = await ethers.provider.getBlock("latest");
+      assert(block2 !== null);
       expect(startTime).to.equal(block2.timestamp);
     });
   });

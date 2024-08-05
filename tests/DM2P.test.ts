@@ -1,40 +1,42 @@
-import "@nomiclabs/hardhat-waffle"
-import { ethers } from 'hardhat'
-import { expect, use } from 'chai'
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address"
-import { DM2P } from "typechain"
-import { BigNumber } from "@ethersproject/bignumber";
+import { ethers } from "hardhat";
+import { expect } from "chai";
+import { DM2P } from "typechain";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
-let owner: SignerWithAddress
-let addr1: SignerWithAddress
-let addr2: SignerWithAddress
-let initialOwnerBalance: BigNumber
+let owner: SignerWithAddress;
+let addr1: SignerWithAddress;
+let addr2: SignerWithAddress;
+let initialOwnerBalance: bigint;
 
-const decimals = BigNumber.from(10).pow(18);
-const initialSupply = BigNumber.from(5 * 1e9).mul(decimals);
-const capAmount = BigNumber.from(1e10).mul(decimals);
+const decimals: bigint = 10n ** 18n;
+const initialSupply: bigint = 5n * 10n ** 9n * decimals;
+const capAmount: bigint = 10n ** 10n * decimals;
 
-const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
-const MINTER_ROLE = "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
-const PAUSER_ROLE = "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a"
-const BURNER_ROLE = "0x3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848"
+const DEFAULT_ADMIN_ROLE =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
+const MINTER_ROLE =
+  "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6";
+const PAUSER_ROLE =
+  "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a";
+const BURNER_ROLE =
+  "0x3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848";
 
 describe("testing for DM2P", async () => {
-    let contract: DM2P
+  let contract: DM2P;
 
-    beforeEach(async () => {
-        const signers = await ethers.getSigners()
-        owner = signers[0]
-        addr1 = signers[1]
-        addr2 = signers[2]
+  beforeEach(async () => {
+    const signers = await ethers.getSigners();
+    owner = signers[0];
+    addr1 = signers[1];
+    addr2 = signers[2];
 
-        const DM2P = await ethers.getContractFactory("DM2P");
-        contract = (await DM2P.deploy()) as DM2P
+    const DM2PFactory = await ethers.getContractFactory("DM2P");
+    contract = await DM2PFactory.deploy();
 
-        await contract.mint(owner.address, initialSupply)
+    await contract.mint(owner.address, initialSupply);
 
-        initialOwnerBalance = await contract.balanceOf(owner.address)
-    })
+    initialOwnerBalance = await contract.balanceOf(owner.address);
+  });
 
   describe("Deployment", function () {
     it("Should assign the total supply of tokens to the owner", async function () {
@@ -43,10 +45,8 @@ describe("testing for DM2P", async () => {
     });
   });
 
-
   describe("Transactions", function () {
     it("Should transfer tokens between accounts", async function () {
-
       await contract.transfer(addr1.address, 50);
       const addr1Balance = await contract.balanceOf(addr1.address);
       expect(addr1Balance).to.equal(50);
@@ -59,12 +59,13 @@ describe("testing for DM2P", async () => {
     });
 
     it("Should fail if sender doesn’t have enough tokens", async function () {
-
       await expect(
         contract.connect(addr1).transfer(owner.address, 1)
       ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
 
-      expect(await contract.balanceOf(owner.address)).to.equal(initialOwnerBalance);
+      expect(await contract.balanceOf(owner.address)).to.equal(
+        initialOwnerBalance
+      );
     });
 
     it("Should update balances after transfers", async function () {
@@ -72,7 +73,7 @@ describe("testing for DM2P", async () => {
       await contract.transfer(addr2.address, 50);
 
       const owner1Balance = await contract.balanceOf(owner.address);
-      expect(owner1Balance).to.equal(initialOwnerBalance.sub(150));
+      expect(owner1Balance).to.equal(initialOwnerBalance - 150n);
 
       const addr1Balance = await contract.balanceOf(addr1.address);
       expect(addr1Balance).to.equal(100);
@@ -81,7 +82,6 @@ describe("testing for DM2P", async () => {
       expect(addr2Balance).to.equal(50);
     });
   });
-
 
   describe("Mint", async function () {
     // First supply
@@ -97,26 +97,27 @@ describe("testing for DM2P", async () => {
     // Admin mint
     it("Should allow admin to mint", async function () {
       await contract.connect(owner).mint(owner.address, 50);
-      expect(
-        await contract.balanceOf(owner.address)
-      ).to.equal(initialOwnerBalance.add(50));
+      expect(await contract.balanceOf(owner.address)).to.equal(
+        initialOwnerBalance + 50n
+      );
     });
 
     // Non-admin mint
     it("Should fail to mint when users other than admin signs", async function () {
       expect(
         contract.connect(addr1).mint(owner.address, 50)
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`);
+      ).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`
+      );
     });
 
     // Mint exceeds the cap
     it("Should fail when exceeds the cap", async function () {
       expect(
-        contract.connect(owner).mint(owner.address, capAmount.add(50))
-      ).to.be.revertedWith('ERC20Capped: cap exceeded');
+        contract.connect(owner).mint(owner.address, capAmount + 50n)
+      ).to.be.revertedWith("ERC20Capped: cap exceeded");
     });
   });
-
 
   describe("pause", async function () {
     // Admin pause, unpause
@@ -125,10 +126,16 @@ describe("testing for DM2P", async () => {
       await contract.connect(owner).pause();
       expect(await contract.paused()).to.equal(true);
 
+      let addr1Balance = await contract.balanceOf(addr1.address);
+      expect(addr1Balance).to.equal(0);
+
       // Transfer while paused
-      expect(
-        contract.transfer(addr1.address, 100)
-      ).to.be.revertedWith('ERC20Pausable: token transfer while paused');
+      expect(contract.transfer(addr1.address, 100n)).to.be.revertedWith(
+        "ERC20Pausable: token transfer while paused"
+      );
+
+      addr1Balance = await contract.balanceOf(addr1.address);
+      expect(addr1Balance).to.equal(0);
 
       // Unpause
       await contract.connect(owner).unpause();
@@ -136,23 +143,23 @@ describe("testing for DM2P", async () => {
 
       // Trasfer after unpause
       await contract.transfer(addr1.address, 50);
-      const addr1Balance = await contract.balanceOf(addr1.address);
-      expect(addr1Balance).to.equal(50);
+      addr1Balance = await contract.balanceOf(addr1.address);
+      expect(addr1Balance).to.equal(50n);
     });
 
     // Non-admin pause
     it("Should fail when pause by non-admin", async function () {
-      expect(
-        contract.connect(addr1).pause()
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`);
+      expect(contract.connect(addr1).pause()).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`
+      );
     });
 
     // Non-admin unpause
     it("Should fail when unpause by non-admin", async function () {
-      await contract.pause()
-      expect(
-          contract.connect(addr1).unpause()
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`);
+      await contract.pause();
+      expect(contract.connect(addr1).unpause()).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${PAUSER_ROLE}`
+      );
     });
   });
 
@@ -160,17 +167,17 @@ describe("testing for DM2P", async () => {
     // Admin burn
     it("Should allow burn by admin", async function () {
       await contract.connect(owner).burn(50);
-      expect(
-        await contract.balanceOf(owner.address)
-      ).to.equal(initialOwnerBalance.sub(50));
-      expect(await contract.totalSupply()).to.equal(initialSupply.sub(50));
+      expect(await contract.balanceOf(owner.address)).to.equal(
+        initialOwnerBalance - 50n
+      );
+      expect(await contract.totalSupply()).to.equal(initialSupply - 50n);
     });
 
     // Non-admin burn
     it("Should fail when burn by non-admin", async function () {
-      expect(
-        contract.connect(addr1).burn(50)
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${BURNER_ROLE}`);
+      expect(contract.connect(addr1).burn(50)).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${BURNER_ROLE}`
+      );
     });
 
     // Admin burnFrom
@@ -178,11 +185,9 @@ describe("testing for DM2P", async () => {
       await contract.connect(owner).mint(addr1.address, 100);
       await contract.connect(addr1).approve(owner.address, 50);
 
-      await contract.connect(owner).burnFrom(addr1.address,50);
-      expect(
-        await contract.balanceOf(addr1.address)
-      ).to.equal(50);
-      expect(await contract.totalSupply()).to.equal(initialSupply.add(50));
+      await contract.connect(owner).burnFrom(addr1.address, 50);
+      expect(await contract.balanceOf(addr1.address)).to.equal(50);
+      expect(await contract.totalSupply()).to.equal(initialSupply + 50n);
     });
 
     // Non-admin burnFrom
@@ -191,8 +196,10 @@ describe("testing for DM2P", async () => {
       await contract.connect(addr1).approve(addr2.address, 50);
 
       expect(
-        contract.connect(addr2).burnFrom(addr1.address,50)
-      ).to.be.revertedWith(`AccessControl: account ${addr2.address.toLowerCase()} is missing role ${BURNER_ROLE}`);
+        contract.connect(addr2).burnFrom(addr1.address, 50)
+      ).to.be.revertedWith(
+        `AccessControl: account ${addr2.address.toLowerCase()} is missing role ${BURNER_ROLE}`
+      );
     });
 
     // burnFrom exceeds the approve
@@ -201,7 +208,7 @@ describe("testing for DM2P", async () => {
       await contract.connect(addr1).approve(owner.address, 50);
 
       expect(
-        contract.connect(owner).burnFrom(addr1.address,100)
+        contract.connect(owner).burnFrom(addr1.address, 100)
       ).to.be.revertedWith("ERC20: insufficient allowance");
     });
   });
@@ -209,29 +216,35 @@ describe("testing for DM2P", async () => {
   describe("AccessControl", async function () {
     // Check initial roles
     it("Should grant initial DEFAULT_ADMIN_ROLE correctly", async function () {
-      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.equal(true);
-      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)).to.equal(false);
+      expect(
+        await contract.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+      ).to.equal(true);
+      expect(
+        await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)
+      ).to.equal(false);
     });
 
     // Grant role
     it("Should allow admin to grant role", async function () {
-      expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(false);
+      expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(
+        false
+      );
 
       await contract.connect(owner).grantRole(MINTER_ROLE, addr1.address);
       expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(true);
 
       // Mint
       await contract.connect(addr1).mint(addr2.address, 50);
-      expect(
-        await contract.balanceOf(addr2.address)
-      ).to.equal(50);
+      expect(await contract.balanceOf(addr2.address)).to.equal(50);
     });
 
     // Non-admin grant role
     it("Should fail when grant role by non-admin", async function () {
       expect(
         contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address)
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`);
+      ).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
+      );
     });
 
     // Revoke role
@@ -242,28 +255,40 @@ describe("testing for DM2P", async () => {
 
       // Revoke MINER_ROLE
       await contract.connect(owner).revokeRole(MINTER_ROLE, addr1.address);
-      expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(false);
+      expect(await contract.hasRole(MINTER_ROLE, addr1.address)).to.equal(
+        false
+      );
 
       // Mint without MINER_ROLE
       expect(
         contract.connect(addr1).mint(owner.address, 50)
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`);
+      ).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${MINTER_ROLE}`
+      );
     });
 
     // Grant ADMIN_ROLE
     it("Should allow admin to revoke role", async function () {
-      await contract.connect(owner).grantRole(DEFAULT_ADMIN_ROLE, addr1.address);
-      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)).to.equal(true);
+      await contract
+        .connect(owner)
+        .grantRole(DEFAULT_ADMIN_ROLE, addr1.address);
+      expect(
+        await contract.hasRole(DEFAULT_ADMIN_ROLE, addr1.address)
+      ).to.equal(true);
 
       // Grant MINER_ROLE with new ADMIN_ROLE
-      await contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address)
+      await contract.connect(addr1).grantRole(MINTER_ROLE, addr2.address);
       expect(await contract.hasRole(MINTER_ROLE, addr2.address)).to.equal(true);
 
       // Grant MINER_ROLE without ADMIN_ROLE
-      await contract.connect(owner).revokeRole(DEFAULT_ADMIN_ROLE, addr1.address);
+      await contract
+        .connect(owner)
+        .revokeRole(DEFAULT_ADMIN_ROLE, addr1.address);
       expect(
         contract.connect(addr1).grantRole(MINTER_ROLE, addr1.address)
-      ).to.be.revertedWith(`AccessControl: account ${addr1.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`);
+      ).to.be.revertedWith(
+        `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
+      );
     });
 
     // Last role member cannot revoke the role
