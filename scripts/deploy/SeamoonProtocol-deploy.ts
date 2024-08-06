@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
-import { DM2P } from "typechain";
+import { SeamoonProtocol } from "typechain";
 
 const main = async () => {
   const [deployer] = await ethers.getSigners();
-  const DM2P = await ethers.getContractFactory("DM2P");
+  const SMP = await ethers.getContractFactory("SeamoonProtocol");
 
-  const contract = (await DM2P.connect(deployer).deploy()) as DM2P;
+  const contract = (await SMP.connect(deployer).deploy()) as SeamoonProtocol;
   await contract.waitForDeployment();
 
   console.log("deployed txHash:", contract.deploymentTransaction()?.hash);

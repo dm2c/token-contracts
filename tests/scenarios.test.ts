@@ -1,15 +1,20 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { DM2P, DM2P__factory, Minter, Minter__factory } from "typechain";
+import {
+  SeamoonProtocol,
+  SeamoonProtocol__factory,
+  Minter,
+  Minter__factory,
+} from "typechain";
 import { beforeEach } from "mocha";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { EventLog } from "ethers";
 
 describe("scenarios", async () => {
-  let DM2P: DM2P__factory;
+  let SMP: SeamoonProtocol__factory;
   let Minter: Minter__factory;
-  let token: DM2P;
+  let token: SeamoonProtocol;
   let minter: Minter;
   let adminRole: string,
     minterRole: string,
@@ -30,8 +35,8 @@ describe("scenarios", async () => {
     carol = signers[4];
 
     Minter = await ethers.getContractFactory("Minter");
-    DM2P = await ethers.getContractFactory("DM2P");
-    token = (await DM2P.deploy()) as DM2P;
+    SMP = await ethers.getContractFactory("SeamoonProtocol");
+    token = (await SMP.deploy()) as SeamoonProtocol;
 
     adminRole = await token.DEFAULT_ADMIN_ROLE();
     minterRole = await token.MINTER_ROLE();
@@ -40,23 +45,23 @@ describe("scenarios", async () => {
   });
 
   it("token deployment", async () => {
-    const dm2p = (await DM2P.deploy()) as DM2P;
-    expect(dm2p.hasRole(adminRole, owner.address));
-    expect(dm2p.hasRole(minterRole, owner.address));
-    expect(dm2p.hasRole(burnerRole, owner.address));
-    expect(dm2p.hasRole(pauserRole, owner.address));
+    const smp = (await SMP.deploy()) as SeamoonProtocol;
+    expect(smp.hasRole(adminRole, owner.address));
+    expect(smp.hasRole(minterRole, owner.address));
+    expect(smp.hasRole(burnerRole, owner.address));
+    expect(smp.hasRole(pauserRole, owner.address));
 
-    await dm2p.grantRole(pauserRole, alice.address);
-    expect(await dm2p.hasRole(pauserRole, alice.address)).to.be.true;
+    await smp.grantRole(pauserRole, alice.address);
+    expect(await smp.hasRole(pauserRole, alice.address)).to.be.true;
 
-    await dm2p.grantRole(minterRole, bob.address);
-    expect(await dm2p.hasRole(minterRole, bob.address)).to.be.true;
+    await smp.grantRole(minterRole, bob.address);
+    expect(await smp.hasRole(minterRole, bob.address)).to.be.true;
 
-    await dm2p
+    await smp
       .connect(bob)
-      .mint(owner.address, ((await dm2p.CAP_AMOUNT()) / 10n) * 2n);
-    expect(await dm2p.balanceOf(owner.address)).to.equal(
-      ((await dm2p.CAP_AMOUNT()) / 10n) * 2n
+      .mint(owner.address, ((await smp.CAP_AMOUNT()) / 10n) * 2n);
+    expect(await smp.balanceOf(owner.address)).to.equal(
+      ((await smp.CAP_AMOUNT()) / 10n) * 2n
     );
   });
 
@@ -106,7 +111,9 @@ describe("scenarios", async () => {
       );
       await expect(
         token.renounceRole(adminRole, owner.address)
-      ).to.be.revertedWith("DM2P: each role must have at least 1 member");
+      ).to.be.revertedWith(
+        "SeamoonProtocol: each role must have at least 1 member"
+      );
     });
   });
 
@@ -179,30 +186,26 @@ describe("scenarios", async () => {
   });
 
   it("can mint up to cap after burn", async () => {
-    const dm2p = (await DM2P.deploy()) as DM2P;
+    const smp = (await SMP.deploy()) as SeamoonProtocol;
 
-    await dm2p.mint(owner.address, await dm2p.CAP_AMOUNT());
-    expect(await dm2p.totalSupply()).to.equal(await dm2p.CAP_AMOUNT());
-    expect(await dm2p.balanceOf(owner.address)).to.equal(
-      await dm2p.CAP_AMOUNT()
-    );
-    await expect(dm2p.mint(owner.address, 1)).to.be.revertedWith(
+    await smp.mint(owner.address, await smp.CAP_AMOUNT());
+    expect(await smp.totalSupply()).to.equal(await smp.CAP_AMOUNT());
+    expect(await smp.balanceOf(owner.address)).to.equal(await smp.CAP_AMOUNT());
+    await expect(smp.mint(owner.address, 1)).to.be.revertedWith(
       "ERC20Capped: cap exceeded"
     );
 
-    await dm2p.burn(await dm2p.CAP_AMOUNT());
-    expect(await dm2p.totalSupply()).to.equal(0);
-    expect(await dm2p.balanceOf(owner.address)).to.equal(0);
+    await smp.burn(await smp.CAP_AMOUNT());
+    expect(await smp.totalSupply()).to.equal(0);
+    expect(await smp.balanceOf(owner.address)).to.equal(0);
 
-    await dm2p.mint(owner.address, await dm2p.CAP_AMOUNT());
-    expect(await dm2p.totalSupply()).to.equal(await dm2p.CAP_AMOUNT());
-    expect(await dm2p.balanceOf(owner.address)).to.equal(
-      await dm2p.CAP_AMOUNT()
-    );
+    await smp.mint(owner.address, await smp.CAP_AMOUNT());
+    expect(await smp.totalSupply()).to.equal(await smp.CAP_AMOUNT());
+    expect(await smp.balanceOf(owner.address)).to.equal(await smp.CAP_AMOUNT());
   });
 
   it("can mint up to cap when revoke assigned Minter contract", async () => {
-    token = (await DM2P.deploy()) as DM2P;
+    token = (await SMP.deploy()) as SeamoonProtocol;
 
     // deploy minter
     const block = await ethers.provider.getBlock("latest");

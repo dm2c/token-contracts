@@ -5,7 +5,7 @@ const main = async () => {
   const addresses = Addresses()!;
 
   await run("verify:verify", {
-    address: addresses.DM2P,
+    address: addresses.SeamoonProtocol,
     constructorArguments: [],
   }).catch((err) => {
     console.error(err);

@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { assert, expect } from "chai";
 import {
-  DM2P,
+  SeamoonProtocol,
   Minter,
   Minter__factory,
   RestrictedVestingWallet,
@@ -31,7 +31,7 @@ const MINTER_ROLE =
 describe("testing for Minter", async () => {
   let Minter: Minter__factory;
   let VestingWallet: RestrictedVestingWallet__factory;
-  let token: DM2P;
+  let token: SeamoonProtocol;
   let minter: Minter;
   let current: number;
   let events: EventLog[] | undefined;
@@ -46,8 +46,8 @@ describe("testing for Minter", async () => {
     VestingWallet = (await ethers.getContractFactory(
       "VestingWallet"
     )) as RestrictedVestingWallet__factory;
-    const DM2P = await ethers.getContractFactory("DM2P");
-    token = await DM2P.deploy();
+    const SMP = await ethers.getContractFactory("SeamoonProtocol");
+    token = await SMP.deploy();
     await token.mint(owner.address, initialSupply);
 
     const block = await ethers.provider.getBlock("latest");
@@ -323,8 +323,8 @@ describe("testing for Minter", async () => {
 
   it("scenario", async () => {
     // deploy token
-    const DM2P = await ethers.getContractFactory("DM2P");
-    token = (await DM2P.deploy()) as DM2P;
+    const SMP = await ethers.getContractFactory("SeamoonProtocol");
+    token = (await SMP.deploy()) as SeamoonProtocol;
     await token.mint(owner.address, initialSupply);
 
     // deploy minter

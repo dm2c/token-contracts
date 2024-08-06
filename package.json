@@ -1,7 +1,7 @@
 {
   "name": "token-contracts",
   "version": "1.0.0",
-  "description": "DM2C Token Contracts",
+  "description": "DMM Crypto Token Contracts",
   "scripts": {
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",

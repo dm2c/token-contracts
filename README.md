@@ -1,16 +1,16 @@
 # Token Contracts
 
-This repository contains the source code for the DM2P token and related contracts.
+This repository contains the source code for the Seamoon Protocol token and related contracts.
 
-See [this whitepaper](https://docs.seamoon.dmm.com/whitepaper/v/en/) for the entire Seamoon Protocol ecosystem that uses DM2P token. 
+See [this whitepaper](https://docs.seamoon.dmm.com/whitepaper/v/en/) for the entire Seamoon Protocol ecosystem that uses Seamoon Protocol token. 
 
 ## Token Types
 
-| Name | Symbol | Decimals | Capped Supply | Mintable | Burnable | Pausable |
-| --- | --- | --- | --- | --- | --- | --- |
-| DM2P | DM2P | 18 | 1e10 | Yes | Yes | Yes |
+| Name             | Symbol | Decimals | Capped Supply | Mintable | Burnable | Pausable |
+|------------------|--------| --- | --- | --- | --- | --- |
+| Seamoon Protocol | SMP    | 18 | 1e10 | Yes | Yes | Yes |
 
- - DM2P is a governance token that is capped.
+ - Seamoon Protocol is a governance token that is capped.
 
 ## ERC20
 The following features will be determined at deploy time, locking them in place.
@@ -54,15 +54,15 @@ Burner accounts can burn tokens from its own accounts. Burning tokens decreases 
 You should be able to install dependencies and then run tests:
 ```
 $ npm install
-$ npx hardhat test test/DM2P.test.ts
+$ npx hardhat test test/SeamoonProtocol.test.ts
 ```
 
 # Deployment Procedure
 ```
 npx hardhat compile
-npx hardhat test test/DM2P.test.ts
-# Fill in the contract address in DM2P: "" in scripts/common.ts
-npx hardhat run scripts/deploys/DM2P-deploy.ts --network mainnet
+npx hardhat test test/SeamoonProtocol.test.ts
+# Fill in the contract address in SeamoonProtocol: "" in scripts/common.ts
+npx hardhat run scripts/deploys/SeamoonProtocol-deploy.ts --network mainnet
 ```
 
 ## Operation confirmed version

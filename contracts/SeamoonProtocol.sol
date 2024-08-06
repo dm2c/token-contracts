@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
 /**
- * DM2P is a governance token that is capped.
+ * Seamoon Protocol is a governance token that is capped.
  * The CAP_AMOUNT is 1e10 * 1e18 (10 Billion).
  * The MINTER_ROLE account can mint new tokens up to
  * the CAP_AMOUNT.
@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
  * and no further operations will be performed to
  * change the total supply.
  */
-contract DM2P is
+contract SeamoonProtocol is
     AccessControlEnumerable,
     ERC20Pausable,
     ERC20Burnable,
@@ -28,7 +28,7 @@ contract DM2P is
 
     uint256 public constant CAP_AMOUNT = 1e10 * 1e18;
 
-    constructor() ERC20("DM2P", "DM2P") ERC20Capped(CAP_AMOUNT) {
+    constructor() ERC20("Seamoon Protocol", "SMP") ERC20Capped(CAP_AMOUNT) {
         // All roles are granted to the deployer.
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
@@ -85,7 +85,7 @@ contract DM2P is
     ) internal virtual override {
         require(
             getRoleMemberCount(role) > 1,
-            "DM2P: each role must have at least 1 member"
+            "SeamoonProtocol: each role must have at least 1 member"
         );
         super._revokeRole(role, account);
     }

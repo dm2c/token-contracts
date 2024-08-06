@@ -1,13 +1,14 @@
 import { ethers, network } from "hardhat";
 import { assert, expect } from "chai";
 import { RestrictedVestingWallet } from "typechain";
-import { DM2P } from "typechain";
+import { SeamoonProtocol } from "typechain";
+import { BigNumber } from "@ethersproject/bignumber";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("VestingWallet", function () {
   let owner: SignerWithAddress;
   let other: SignerWithAddress;
-  let token: DM2P;
+  let token: SeamoonProtocol;
   let vestingWallet: RestrictedVestingWallet;
 
   const decimals = 10n ** 18n;
@@ -16,8 +17,8 @@ describe("VestingWallet", function () {
   beforeEach(async function () {
     [owner, other] = await ethers.getSigners();
 
-    const DM2P = await ethers.getContractFactory("DM2P");
-    token = await DM2P.deploy();
+    const SMP = await ethers.getContractFactory("SeamoonProtocol");
+    token = await SMP.deploy();
     await token.waitForDeployment();
   });
 
