@@ -18,12 +18,12 @@ import type { OAppOmniGraphHardhat, OmniPointHardhat } from '@layerzerolabs/tool
  *     },
  */
 const ethereumContract: OmniPointHardhat = {
-    eid: EndpointId.ETHEREUM_MAINNET,
+    eid: EndpointId.ETHEREUM_V2_MAINNET,
     contractName: 'SeamoonProtocolAdapter',
 }
 
 const optimismContract: OmniPointHardhat = {
-    eid: EndpointId.OPTIMISM_MAINNET,
+    eid: EndpointId.OPTIMISM_V2_MAINNET,
     contractName: 'SeamoonProtocol',
 }
 

@@ -59,7 +59,7 @@ const config: HardhatUserConfig = {
             
         },
         'ethereum': {
-            eid: EndpointId.ETHEREUM_MAINNET,
+            eid: EndpointId.ETHEREUM_V2_MAINNET,
             url: process.env.RPC_URL_ETHEREUM || 'https://mainnet.infura.io/v3/',
             accounts,
             oftAdapter: {
@@ -67,7 +67,7 @@ const config: HardhatUserConfig = {
             },
         },
         'optimism': {
-            eid: EndpointId.OPTIMISM_MAINNET,
+            eid: EndpointId.OPTIMISM_V2_MAINNET,
             url: process.env.RPC_URL_OPTIMISM || 'https://mainnet.optimism.io',
             accounts,
         },
