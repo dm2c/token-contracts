@@ -1,5 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config";
-import { HttpNetworkAccountsConfig } from "hardhat/types";
+import { HttpNetworkAccountsConfig } from "smp/node_modules/hardhat/types";
 
 import "@typechain/hardhat";
 import "@nomicfoundation/hardhat-ethers";
@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: "./contracts",
-    tests: "./tests",
+    tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
   },

@@ -84,7 +84,7 @@ contract Minter is Ownable {
     /**
      * @dev Mint the specified amount of tokens and locked into the Vesting contract,
      *      which is created anew each time.
-     *
+     * 
      * @param beneficiary an address who is able to withdraw tokens from Vesting contract.
      * @param amount an amount to mint.
      */
