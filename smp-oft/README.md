@@ -113,8 +113,41 @@ npx hardhat lz:deploy --help
 
 By following these steps, you can focus more on creating innovative omnichain solutions and less on the complexities of cross-chain communication.
 
+## 3) Operation After deployment
+Send OFT token from one chain to another
+```bash
+npx hardhat sendOFT --srcchain sepolia --dstchain op-sepolia --receiver <address> --amount 1 --network sepolia
+```
+
+Block corss chain transaction by swiching send Library to blocking library. 
+```bash
+npx hardhat blockSend --srcchain sepolia --dstchain op-sepolia --isblock false --network sepolia
+```
+
 <br></br>
 
 <p align="center">
   Join our community on <a href="https://discord-layerzero.netlify.app/discord" style="color: #a77dff">Discord</a> | Follow us on <a href="https://twitter.com/LayerZero_Labs" style="color: #a77dff">Twitter</a>
 </p>
+
+## 3) DVN Configuration
+
+#### Get DVN configuration from specific path. 
+
+```bash
+npx hardhat run scripts/getDVNConfig.ts --network sepolia
+```
+
+Please note that destination chain is hardcoded in the script and this value should be updated accordingly. 
+
+
+#### Update DVN Configuration
+
+Please see layerzero.example.config.ts, which is updating DVN to polyphedra.
+You can apply the change by following command. 
+
+```bash
+npx hardhat lz:oapp:wire --oapp-config layerzero.example.config.ts 
+```
+
+

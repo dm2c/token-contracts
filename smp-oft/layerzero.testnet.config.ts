@@ -27,8 +27,8 @@ const opSepoliaContract: OmniPointHardhat = {
     contractName: 'SeamoonProtocol',
 }
 
-const amoyContract: OmniPointHardhat = {
-    eid: EndpointId.AMOY_V2_TESTNET,
+const dm2TestContract: OmniPointHardhat = {
+    eid: EndpointId.DM2VERSE_V2_TESTNET,
     contractName: 'SeamoonProtocol',
 }
 
@@ -41,7 +41,7 @@ const config: OAppOmniGraphHardhat = {
             contract: sepoliaContract,
         },
         {
-            contract: amoyContract,
+            contract: dm2TestContract,
         },
     ],
     connections: [
@@ -51,7 +51,7 @@ const config: OAppOmniGraphHardhat = {
         },
         {
             from: opSepoliaContract,
-            to: amoyContract,
+            to: dm2TestContract,
         },
         {
             from: sepoliaContract,
@@ -59,14 +59,14 @@ const config: OAppOmniGraphHardhat = {
         },
         {
             from: sepoliaContract,
-            to: amoyContract,
+            to: dm2TestContract,
         },
         {
-            from: amoyContract,
+            from: dm2TestContract,
             to: sepoliaContract,
         },
         {
-            from: amoyContract,
+            from: dm2TestContract,
             to: opSepoliaContract,
         },
     ],
