@@ -118,3 +118,25 @@ By following these steps, you can focus more on creating innovative omnichain so
 <p align="center">
   Join our community on <a href="https://discord-layerzero.netlify.app/discord" style="color: #a77dff">Discord</a> | Follow us on <a href="https://twitter.com/LayerZero_Labs" style="color: #a77dff">Twitter</a>
 </p>
+
+## 3) DVN Configuration
+
+#### Get DVN configuration from specific path. 
+
+```bash
+npx hardhat run scripts/getDVNConfig.ts --network sepolia
+```
+
+Please note that destination chain is hardcoded in the script and this value should be updated accordingly. 
+
+
+#### Update DVN Configuration
+
+Please see layerzero.example.config.ts, which is updating DVN to polyphedra.
+You can apply the change by following command. 
+
+```bash
+npx hardhat lz:oapp:wire --oapp-config layerzero.example.config.ts 
+```
+
+
