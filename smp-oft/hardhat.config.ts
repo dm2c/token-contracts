@@ -89,9 +89,9 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_AMOY || 'https://polygon-amoy-bor-rpc.publicnode.com',
             accounts,
         },
-        'dmm-verse-testnet': {
-            //eid: EndpointId.DMM_V2_TESTNET,
-            url: process.env.RPC_URL_DMM_TEST || 'https://rpc.testnet.dm2verse.dmm.com/',
+        'dm2-verse-testnet': {
+            eid: EndpointId.DM2VERSE_V2_TESTNET,
+            url: process.env.RPC_URL_DM2_TEST || 'https://rpc.testnet.dm2verse.dmm.com/',
             accounts,
         },
     },
@@ -107,6 +107,7 @@ const config: HardhatUserConfig = {
             sepolia: process.env.ETHERSCAN_API_KEY || '',
             'op-sepolia': process.env.OP_ETHERSCAN_API_KEY || '',
             amoy: process.env.POLYGON_SCAN_API_KEY || '',
+            'dm2-verse-testnet': 'your API key'
         },
         customChains: [
             {
@@ -125,6 +126,14 @@ const config: HardhatUserConfig = {
                 browserURL: "https://amoy.polygonscan.com"
               }
             },
+            {
+                network: "dm2-verse-testnet",
+                chainId: 68775,
+                urls: {
+                  apiURL: "https://explorer.testnet.dm2verse.dmm.com/api",
+                  browserURL: "https://explorer.testnet.dm2verse.dmm.com"
+                }
+              },
             {
               network: "ethereum",
               chainId: 1,

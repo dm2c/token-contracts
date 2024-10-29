@@ -27,8 +27,8 @@ const optimismContract: OmniPointHardhat = {
     contractName: 'SeamoonProtocol',
 }
 
-// const dmmContract: OmniPointHardhat = {
-//     eid: EndpointId.DMM_MAINET,
+// const dm2Contract: OmniPointHardhat = {
+//     eid: EndpointId.DM2_MAINET,
 //     contractName: 'SeamoonProtocol',
 // }
 
