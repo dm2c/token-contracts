@@ -113,6 +113,17 @@ npx hardhat lz:deploy --help
 
 By following these steps, you can focus more on creating innovative omnichain solutions and less on the complexities of cross-chain communication.
 
+## 3) Operation After deployment
+Send OFT token from one chain to another
+```bash
+npx hardhat sendOFT --srcchain sepolia --dstchain op-sepolia --receiver <address> --amount 1 --network sepolia
+```
+
+Block corss chain transaction by swiching send Library to blocking library. 
+```bash
+npx hardhat blockSend --srcchain sepolia --dstchain op-sepolia --isblock false --network sepolia
+```
+
 <br></br>
 
 <p align="center">

@@ -15,6 +15,7 @@ import { EndpointId } from '@layerzerolabs/lz-definitions'
 import "@nomicfoundation/hardhat-verify";
 import './type-extensions'
 import './tasks/sendOFT';
+import './tasks/blockSend';
 
 // Set your preferred authentication method
 //
